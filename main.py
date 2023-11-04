@@ -1,5 +1,5 @@
 from utility.load_data import load_data
-from utility.make_plots import plot_prices
+from utility.make_plots import *
 
 from strategies.mean_reversion import MeanReversion
 
@@ -10,12 +10,12 @@ df = load_data(start_date="2023-01-01", ticker="U", granularity="1h")
 
 mv_object = MeanReversion(
     df_prices=df["close"], 
-    window=60
+    window=60,
 )
 
 mv_positions = mv_object.run_simulation()
 
 # Plot data
-plot_prices(df["close"])
+plot_positions(mv_positions, df["close"])
 
 

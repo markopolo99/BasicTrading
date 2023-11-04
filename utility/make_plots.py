@@ -22,3 +22,20 @@ def plot_prices(df: pd.DataFrame) -> None:
     plt.show()
 
     pass
+
+def plot_positions(df_positions: pd.DataFrame, df_prices: pd.DataFrame) -> None:
+
+    # Create the main plot
+    fig, ax1 = plt.subplots()
+
+    # Plot the first dataset with the first y-axis
+    ax1.plot(df_prices, color='tab:blue')
+    ax1.set_xlabel('Time')
+    ax1.set_ylabel('Close prices', color='tab:blue')
+
+    # Create a second y-axis and plot the second dataset
+    ax2 = ax1.twinx()
+    ax2.plot(df_positions, color='tab:red')
+    ax2.set_ylabel('Position', color='tab:red')
+
+    pass
