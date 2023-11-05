@@ -22,9 +22,10 @@ ma_object = MACrossover(
     ma_pair=[4,15],
 )
 
-mv_positions = ma_object.run_simulation()
+ma_object.get_positions()
+ma_object.get_returns()
 
 # Plot data
-plot_positions(mv_positions, df["close"])
+plot_positions(ma_object.positions, df["close"])
 
 
