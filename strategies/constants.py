@@ -5,4 +5,5 @@ TRADING_STATS = [
     "lowest_low", 
     "highest_high", 
     "hold_duration",
+    "return",
 ]
