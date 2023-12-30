@@ -2,18 +2,26 @@ import pandas as pd
 import yfinance as yf
 
 
-class Data:
+class StockData:
+    """
+    Store stock information into a retrievable format. In case
+    any further information is needed for a trading strategy
+    or any adjustments need to be made to the data, do it here.
 
-    def __init__(self,
-                 prices: pd.Series,
-                 indicator: pd.Series,
-                 start_date: str,
-                 end_date: str,):
+    We further split the data according to the train, test, and
+    validation set. It is split such that 60% of the data is in
+    the train set, 20% in the test set, and 20% in the validation
+    set.
+    """
+    def __init__(self, prices: pd.Series):
 
-        self.prices = prices
-        self.indicator = indicator
-        self.start_date = start_date
-        self.end_date = end_date
+        duration = len(prices)
+
+        self.train_set = prices.iloc[:int(duration * 0.8), :]
+        self.test_set = prices.iloc[int(duration * 0.8):int(duration * 0.9), :]
+        self.validation_set = prices.iloc[int(duration * 0.9):int(duration), :]
+        self.start_date = prices.index.min()
+        self.end_date = prices.index.max()
 
 
 class LoadData:
@@ -54,7 +62,9 @@ def main():
         start_date=start,
         end_date=end,).df_prices
 
-    return df_prices
+    stock_obj = StockData(df_prices)
+
+    return stock_obj
 
 
 if __name__ == "__main__":
