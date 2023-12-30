@@ -1,5 +1,9 @@
+
+import pandas as pd
+
 from backtester.data import LoadData, StockData
 from backtester.backtester import Backtester
+from backtester.plotter import Plotter
 
 from strategies.strategy_crossover import StrategyDC
 import sys
@@ -25,9 +29,17 @@ strategy_obj = StrategyDC(
     window_slow=10,
 )
 
-backtest_obj = Backtester(
+backtest_results = Backtester(
     stock=stock_obj,
     strategy=strategy_obj,
 ).run()
 
+plot_obj = Plotter(
+    backtest_results=backtest_results,
+    strat_data=strategy_obj
+)
+
+plot_obj.create_dashboard(
+    indicators=pd.concat([strategy_obj.fast_ma, strategy_obj.slow_ma], axis=1),
+)
 temp = 1

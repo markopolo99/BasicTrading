@@ -45,6 +45,7 @@ class PositionState:
             exit_time=self.exit_time,
             position_type=self.position_type,
             position_size=self.position_size,
+            spread=self.equity.spread
         )
 
         # Update equity available after position is closed
@@ -70,6 +71,7 @@ class TradeLog:
                 "Exit price",
                 "Position type",
                 "Position size",
+                "Spread"
             ],
         )
 
@@ -79,7 +81,8 @@ class TradeLog:
                    entry_time: pd.DatetimeIndex,
                    exit_time: pd.DatetimeIndex,
                    position_type: str,
-                   position_size: int,):
+                   position_size: int,
+                   spread: float):
 
         self.log.loc[entry_time] = pd.Series(
             [
@@ -88,13 +91,15 @@ class TradeLog:
                 exit_price,
                 position_type,
                 position_size,
+                spread,
             ],
-            columns=[
+            index=[
                 "Exit time",
                 "Entry price",
                 "Exit price",
                 "Position type",
-                "Position size"
+                "Position size",
+                "Spread"
             ],
         )
 
@@ -105,6 +110,7 @@ class Equity:
         self.available_equity = equity
         self.realised = []
         self.unrealised = []
+        self.spread = 0,
 
     def update_unrealised_equity(self,
                                  current_time: pd.DatetimeIndex,
@@ -114,14 +120,14 @@ class Equity:
                                  current_price: float,):
 
         if position_type == 'long':
-            current_spread = current_price - entry_price
+            self.spread = current_price - entry_price
         else:
-            current_spread = entry_price - current_price
+            self.spread = entry_price - current_price
 
         self.unrealised.append(
             [
                 current_time,
-                self.available_equity + current_spread * position_size
+                self.available_equity + self.spread * position_size
             ]
         )
 
@@ -133,15 +139,15 @@ class Equity:
                                exit_price: float,):
 
         if position_type == 'long':
-            current_spread = exit_price - entry_price
+            self.spread = exit_price - entry_price
         else:
-            current_spread = entry_price - exit_price
+            self.spread = entry_price - exit_price
 
         self.realised.append(
             [
                 current_time,
-                self.available_equity + current_spread * position_size
+                self.available_equity + self.spread * position_size
             ]
         )
 
-        self.available_equity += current_spread * position_size
+        self.available_equity += self.spread * position_size
