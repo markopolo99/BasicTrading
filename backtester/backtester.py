@@ -1,9 +1,9 @@
-from data import Data
+from data import StockData
 
 
 class Backtester:
 
-    def __init__(self, data: Data):
+    def __init__(self, data: StockData):
         self.data = data
 
     def run():
