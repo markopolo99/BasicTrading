@@ -2,7 +2,6 @@ from backtester.data import LoadData, StockData
 from backtester.backtester import Backtester
 
 from strategies.strategy_crossover import StrategyDC
-
 import sys
 sys.path.append("C:\\Users\\tomic\\Desktop\\BasicStrategy\\BasicTrading")
 

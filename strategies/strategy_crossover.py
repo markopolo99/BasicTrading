@@ -1,40 +1,42 @@
-import pandas as pd
 from backtester.strategy import Strategy
 
 
-class MACrossover(Strategy):
+class StrategyDC(Strategy):
 
-    def __init__(self, stock_info):
-        self.stock_prices
+    def __init__(self, stock_info, window_slow, window_fast):
+        self.fast_ma = stock_info.train.open.rolling(window=window_fast).mean()
+        self.slow_ma = stock_info.train.open.rolling(window=window_slow).mean()
 
-    def long():
-        pass
+    def long(self, date):
 
-    def short():
-        pass
-
-    def close():
-        pass
-
-    def _calc_indicator(self):
-
-        self._indicator = pd.DataFrame(index=self.df_prices.index)
-
-        for ma in self.ma_pair:
-            self._indicator.loc[:, "ma_" + str(ma)] = self.df_prices.rolling(window=ma).mean()
-
-        self._indicator = self._indicator.fillna(0)
-
-        return self._indicator
-
-    def _position_taking(self, date: pd.Timestamp):
-
-        fast_ma = self._indicator.loc[date, "ma_" + str(self.ma_pair[0])]
-        slow_ma = self._indicator.loc[date, "ma_" + str(self.ma_pair[1])]
-
-        if fast_ma > slow_ma:
-            _current_condition = True
+        if self.fast_ma[date] > self.slow_ma[date]:
+            enter_position = True
+            self.ma_position = 'above'
         else:
-            _current_condition = False
+            enter_position = False
 
-        return _current_condition
+        return enter_position
+
+    def short(self, date):
+
+        if self.fast_ma[date] < self.slow_ma[date]:
+            enter_position = True
+            self.ma_position = 'below'
+        else:
+            enter_position = False
+
+        return enter_position
+
+    def close(self, date):
+        """
+        Check to see if the moving average crosses from above
+        or below.
+        """
+        if self.ma_position == 'below' and self.fast_ma[date] > self.slow_ma[date]:
+            close_position = True
+        elif self.ma_positon == 'above' and self.fast_ma[date] < self.slow_ma[date]:
+            close_position = True
+        else:
+            close_position = False
+
+        return close_position
