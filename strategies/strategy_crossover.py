@@ -6,6 +6,7 @@ class StrategyDC(Strategy):
     def __init__(self, stock_info, window_slow, window_fast):
         self.fast_ma = stock_info.train.open.rolling(window=window_fast).mean()
         self.slow_ma = stock_info.train.open.rolling(window=window_slow).mean()
+        self.ma_position = 'nowhere'
 
     def long(self, date):
 
@@ -34,7 +35,7 @@ class StrategyDC(Strategy):
         """
         if self.ma_position == 'below' and self.fast_ma[date] > self.slow_ma[date]:
             close_position = True
-        elif self.ma_positon == 'above' and self.fast_ma[date] < self.slow_ma[date]:
+        elif self.ma_position == 'above' and self.fast_ma[date] < self.slow_ma[date]:
             close_position = True
         else:
             close_position = False

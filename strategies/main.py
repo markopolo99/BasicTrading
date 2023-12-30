@@ -19,5 +19,15 @@ df_prices = LoadData(
     end_date=end,).df_prices
 
 stock_obj = StockData(df_prices)
+strategy_obj = StrategyDC(
+    stock_obj,
+    window_fast=5,
+    window_slow=10,
+)
 
-backtest_obj = Backtester(stock_obj, StrategyDC)
+backtest_obj = Backtester(
+    stock=stock_obj,
+    strategy=strategy_obj,
+).run()
+
+temp = 1

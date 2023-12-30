@@ -21,9 +21,9 @@ class Backtester:
 
     """
 
-    def __init__(self, stock: StockData, strat: Strategy):
+    def __init__(self, stock: StockData, strategy: Strategy):
         self.stock = stock
-        self.strategy = strat
+        self.strategy = strategy
         self.position_train = PositionState()
         self.position_test = PositionState()
 
@@ -34,17 +34,35 @@ class Backtester:
         of the trading strategy.
         """
 
-        for date, _ in self.stock.train.iterrows():
+        for date, current_price in self.stock.train.iterrows():
 
             # Only close if you are in a position, and the close position is true
-            if self.strategy.close(date) and self.position_train.in_position:
-                self.position_train.close_position()
+            if self.position_train.in_position and self.strategy.close(date):
+                self.position_train.close_position(
+                    current_info=self.stock.train.loc[date],
+                )
 
-            if self.strategy.long(date) and not self.position_train.in_position:
-                self.position_train.open_position(position_type='long')
+            # Check conditions for going long and short
+            if not self.position_train.in_position and self.strategy.long(date):
+                self.position_train.open_position(
+                    position_type='long',
+                    current_info=self.stock.train.loc[date],
+                )
+            elif not self.position_train.in_position and self.strategy.short(date):
+                self.position_train.open_position(
+                    position_type='short',
+                    current_info=self.stock.train.loc[date],
+                )
 
-            elif self.strategy.short(date) and not self.position_train.in_position:
-                self.position_train.open_position(position_type='short')
+            # After each new observation, in case you are in a position
+            # calculate the change in equity value - unrealised equity
+            if self.position_train.in_position:
+                self.position_train.equity.update_unrealised_equity(
+                    current_time=date,
+                    current_price=self.position_train.entry_price,
+                    entry_price=current_price.open,
+                    position_size=self.position_train.position_size,
+                    position_type=self.position_train.position_type,
+                )
 
-    def get_stats(self):
-        pass
+        return self.position_train

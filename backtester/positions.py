@@ -24,7 +24,7 @@ class PositionState:
         self.entry_price = current_info["open"]
 
         # Keep track of the current point in time
-        self.entry_time = current_info.index
+        self.entry_time = current_info.name
 
         # Note down the type of position (long/short)
         self.position_type = position_type
@@ -35,7 +35,7 @@ class PositionState:
 
     def close_position(self, current_info: pd.Series):
         self.exit_price = current_info["close"]
-        self.exit_time = current_info.index
+        self.exit_time = current_info.name
 
         # Pass all the stored information into the tradelog
         self.tradelog.update_log(
@@ -47,6 +47,15 @@ class PositionState:
             position_size=self.position_size,
         )
 
+        # Update equity available after position is closed
+        self.equity.update_realised_equity(
+            current_time=self.exit_time,
+            position_type=self.position_type,
+            position_size=self.position_size,
+            entry_price=self.entry_price,
+            exit_price=self.exit_price,
+        )
+
         # Revert the position variable to false once position is closed
         self.in_position = False
 
@@ -56,10 +65,9 @@ class TradeLog:
     def __init__(self):
         self.log = pd.DataFrame(
             columns=[
+                "Exit time",
                 "Entry price",
                 "Exit price",
-                "Entry time",
-                "Exit time",
                 "Position type",
                 "Position size",
             ],
@@ -73,7 +81,7 @@ class TradeLog:
                    position_type: str,
                    position_size: int,):
 
-        self.log.loc[entry_time] = pd.DataFrame(
+        self.log.loc[entry_time] = pd.Series(
             [
                 exit_time,
                 entry_price,
@@ -98,12 +106,12 @@ class Equity:
         self.realised = []
         self.unrealised = []
 
-    def unrealised_equity(self,
-                          current_time: pd.DatetimeIndex,
-                          position_type: str,
-                          position_size: int,
-                          entry_price: float,
-                          current_price: float,):
+    def update_unrealised_equity(self,
+                                 current_time: pd.DatetimeIndex,
+                                 position_type: str,
+                                 position_size: int,
+                                 entry_price: float,
+                                 current_price: float,):
 
         if position_type == 'long':
             current_spread = current_price - entry_price
@@ -117,12 +125,12 @@ class Equity:
             ]
         )
 
-    def realised_equity(self,
-                        current_time: pd.DatetimeIndex,
-                        position_type: str,
-                        position_size: int,
-                        entry_price: float,
-                        exit_price: float,):
+    def update_realised_equity(self,
+                               current_time: pd.DatetimeIndex,
+                               position_type: str,
+                               position_size: int,
+                               entry_price: float,
+                               exit_price: float,):
 
         if position_type == 'long':
             current_spread = exit_price - entry_price
