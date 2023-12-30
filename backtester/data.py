@@ -12,14 +12,21 @@ class StockData:
     validation set. It is split such that 60% of the data is in
     the train set, 20% in the test set, and 20% in the validation
     set.
+
+    You can access:
+        - train
+        - test
+        - validation
+        - start_date
+        - end_date
     """
     def __init__(self, prices: pd.Series):
 
         duration = len(prices)
 
-        self.train_set = prices.iloc[:int(duration * 0.8), :]
-        self.test_set = prices.iloc[int(duration * 0.8):int(duration * 0.9), :]
-        self.validation_set = prices.iloc[int(duration * 0.9):int(duration), :]
+        self.train = prices.iloc[:int(duration * 0.6), :]
+        self.test = prices.iloc[int(duration * 0.6):int(duration * 0.8), :]
+        self.validation = prices.iloc[int(duration * 0.8):int(duration), :]
         self.start_date = prices.index.min()
         self.end_date = prices.index.max()
 
