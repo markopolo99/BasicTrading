@@ -11,7 +11,7 @@ class Plotter:
         self.realised_equity = pd.DataFrame(backtest_results.equity.realised)
         self.unrealised_equity = pd.DataFrame(backtest_results.equity.unrealised)
 
-    def create_dashboard(self, indicators):
+    def create_dashboard(self, indicators, stats):
 
         fig = make_subplots(
             rows=4,
@@ -19,7 +19,7 @@ class Plotter:
             specs=[
                 [{}, {"rowspan": 2}],
                 [{}, None],
-                [{}, {"rowspan": 2}],
+                [{}, {"type": "table", "rowspan": 2}],
                 [{}, None]],
             shared_xaxes=True,
         )
@@ -110,14 +110,13 @@ class Plotter:
         )
 
         # PLOT OF TRADING STATISTICS
-        # fig.add_trace(
-        #     go.Table(
-        #         header=
-        #         cells=dict(
-        #             values=[df[k].tolist() for k in df.columns[1:]],
-        #             align = "left")
-        #     ),
-        #     row=4, col=2
-        # )
+        fig.add_trace(
+            go.Table(
+                header=dict(values=["Statistics", "Values"]),
+                cells=dict(values=stats.T),
+            ),
+            row=3,
+            col=2,
+        )
 
         fig.show()

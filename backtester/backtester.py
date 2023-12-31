@@ -1,3 +1,4 @@
+import pandas as pd
 from backtester.data import StockData
 from backtester.strategy import Strategy
 from backtester.positions import PositionState
@@ -65,4 +66,45 @@ class Backtester:
                     position_type=self.position_train.position_type,
                 )
 
-        return self.position_train
+        stats = self.get_stats()
+
+        return self.position_train, stats
+
+    def get_stats(self):
+
+        equity = pd.DataFrame(self.position_train.equity.realised)
+        unrealised_equity = pd.DataFrame(self.position_train.equity.unrealised)
+
+        # The number of positive trades
+        profitable_trades = (self.position_train.tradelog.log["Spread"] > 0).sum()
+
+        # The duration of the trades
+        trade_duration = (
+            self.position_train.tradelog.log["Exit time"] - self.position_train.tradelog.log.index
+        )
+
+        # Indicies with negative and positive trades
+        negative_trades = self.position_train.tradelog.log[self.position_train.tradelog.log["Spread"] < 0]["Spread"]
+
+        stats = pd.DataFrame(
+            [
+                ["equity_start", equity.iloc[0, 1]],
+                ["equity_final", equity.iloc[-1, 1]],
+                ["equity_peak", unrealised_equity.iloc[:, 1].max()],
+                ["return", equity.iloc[-1, 1] / equity.iloc[0, 1]],
+                ["buy_and_hold_return", self.stock.train.open[-1] / self.stock.train.open[0]],
+                ["volatility", equity.iloc[:, 1].std()],
+                ["sharpe_ratio", equity.iloc[:, 1].mean() / equity.iloc[:, 1].std()],
+                ["max_drawdown", unrealised_equity.iloc[:, 1].min()],
+                ["average_drawdown", negative_trades.mean()],
+                ["max_drawdown_duration", str(trade_duration[negative_trades.index].max())],
+                ["average_drawdown_duration", str(trade_duration[negative_trades.index].mean())],
+                ["number_of_trades", len(self.position_train.tradelog.log)],
+                ["win_rate", profitable_trades / len(self.position_train.tradelog.log)],
+                ["best_trade", self.position_train.tradelog.log["Spread"].max()],
+                ["worst_trade", self.position_train.tradelog.log["Spread"].min()],
+                ["average_trade return", self.position_train.tradelog.log["Spread"].mean()],
+            ]
+        )
+
+        return stats

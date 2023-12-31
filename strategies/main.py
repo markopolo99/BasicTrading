@@ -1,4 +1,3 @@
-
 import pandas as pd
 
 from backtester.data import LoadData, StockData
@@ -29,7 +28,7 @@ strategy_obj = StrategyDC(
     window_slow=10,
 )
 
-backtest_results = Backtester(
+backtest_results, stats = Backtester(
     stock=stock_obj,
     strategy=strategy_obj,
 ).run()
@@ -41,5 +40,6 @@ plot_obj = Plotter(
 
 plot_obj.create_dashboard(
     indicators=pd.concat([strategy_obj.fast_ma, strategy_obj.slow_ma], axis=1),
+    stats=stats,
 )
 temp = 1
