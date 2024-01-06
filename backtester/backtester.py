@@ -66,6 +66,12 @@ class Backtester:
                     position_type=self.position_train.position_type,
                 )
 
+        # Close any position that remains open after the end of the period
+        if self.position_train.in_position and self.strategy.close(date):
+            self.position_train.close_position(
+                current_info=self.stock.train.loc[date],
+            )
+
         stats = self.get_stats()
 
         return self.position_train, stats

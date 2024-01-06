@@ -39,10 +39,21 @@ class Plotter:
 
         fig.add_trace(
             go.Scatter(
-                x=self.backtest_results.tradelog.log["Exit time"],
+                x=self.backtest_results.tradelog.log.index,
                 y=self.backtest_results.tradelog.log["Entry price"],
                 mode="markers",
-                name="Positions",
+                name="Entry price",
+            ),
+            row=1,
+            col=1,
+        )
+
+        fig.add_trace(
+            go.Scatter(
+                x=self.backtest_results.tradelog.log["Exit time"],
+                y=self.backtest_results.tradelog.log["Exit price"],
+                mode="markers",
+                name="Exit price",
             ),
             row=1,
             col=1,
@@ -80,7 +91,7 @@ class Plotter:
                 x=self.unrealised_equity.iloc[:, 0],
                 y=self.unrealised_equity.iloc[:, 1],
                 mode="lines",
-                name="Unrealised",
+                name="Unrealised equity",
             ),
             row=1,
             col=2,
@@ -91,7 +102,7 @@ class Plotter:
                 x=self.realised_equity.iloc[:, 0],
                 y=self.realised_equity.iloc[:, 1],
                 mode="markers",
-                name="Equity",
+                name="Realised equity",
             ),
             row=1,
             col=2,

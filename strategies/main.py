@@ -11,7 +11,7 @@ sys.path.append("C:\\Users\\tomic\\Desktop\\BasicStrategy\\BasicTrading")
 # Specify the type of data you want
 ticker = 'DKNG'
 granul = '1h'
-start = '2022-01-01'
+start = '2022-03-01'
 end = '2023-12-01'
 
 # Load data according to specifications
