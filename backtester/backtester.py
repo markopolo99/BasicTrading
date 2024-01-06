@@ -94,22 +94,22 @@ class Backtester:
 
         stats = pd.DataFrame(
             [
-                ["equity_start", equity.iloc[0, 1]],
-                ["equity_final", equity.iloc[-1, 1]],
-                ["equity_peak", unrealised_equity.iloc[:, 1].max()],
-                ["return", equity.iloc[-1, 1] / equity.iloc[0, 1]],
-                ["buy_and_hold_return", self.stock.train.open[-1] / self.stock.train.open[0]],
-                ["volatility", equity.iloc[:, 1].std()],
-                ["sharpe_ratio", equity.iloc[:, 1].mean() / equity.iloc[:, 1].std()],
-                ["max_drawdown", unrealised_equity.iloc[:, 1].min()],
-                ["average_drawdown", negative_trades.mean()],
+                ["equity_start", round(equity.iloc[0, 1], 2)],
+                ["equity_final", round(equity.iloc[-1, 1], 2)],
+                ["equity_peak", round(unrealised_equity.iloc[:, 1].max(), 2)],
+                ["return", round(equity.iloc[-1, 1] / equity.iloc[0, 1], 4)],
+                ["buy_and_hold_return", round(self.stock.train.open[-1] / self.stock.train.open[0], 4)],
+                ["volatility", round(equity.iloc[:, 1].std(), 4)],
+                ["sharpe_ratio", round(equity.iloc[:, 1].mean() / equity.iloc[:, 1].std(), 4)],
+                ["max_drawdown", round(unrealised_equity.iloc[:, 1].min(), 2)],
+                ["average_drawdown", round(negative_trades.mean(), 4)],
                 ["max_drawdown_duration", str(trade_duration[negative_trades.index].max())],
-                ["average_drawdown_duration", str(trade_duration[negative_trades.index].mean())],
+                ["average_drawdown_duration", str(trade_duration[negative_trades.index].mean()).split('.')[0]],
                 ["number_of_trades", len(self.position_train.tradelog.log)],
-                ["win_rate", profitable_trades / len(self.position_train.tradelog.log)],
-                ["best_trade", self.position_train.tradelog.log["Spread"].max()],
-                ["worst_trade", self.position_train.tradelog.log["Spread"].min()],
-                ["average_trade return", self.position_train.tradelog.log["Spread"].mean()],
+                ["win_rate", round(profitable_trades / len(self.position_train.tradelog.log), 4)],
+                ["best_trade", round(self.position_train.tradelog.log["Spread"].max(), 3)],
+                ["worst_trade", round(self.position_train.tradelog.log["Spread"].min(), 3)],
+                ["average_trade return", round(self.position_train.tradelog.log["Spread"].mean(), 3)],
             ]
         )
 

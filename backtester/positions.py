@@ -37,6 +37,15 @@ class PositionState:
         self.exit_price = current_info["close"]
         self.exit_time = current_info.name
 
+        # Update equity available after position is closed
+        self.equity.update_realised_equity(
+            current_time=self.exit_time,
+            position_type=self.position_type,
+            position_size=self.position_size,
+            entry_price=self.entry_price,
+            exit_price=self.exit_price,
+        )
+
         # Pass all the stored information into the tradelog
         self.tradelog.update_log(
             entry_price=self.entry_price,
@@ -46,15 +55,6 @@ class PositionState:
             position_type=self.position_type,
             position_size=self.position_size,
             spread=self.equity.spread
-        )
-
-        # Update equity available after position is closed
-        self.equity.update_realised_equity(
-            current_time=self.exit_time,
-            position_type=self.position_type,
-            position_size=self.position_size,
-            entry_price=self.entry_price,
-            exit_price=self.exit_price,
         )
 
         # Revert the position variable to false once position is closed
