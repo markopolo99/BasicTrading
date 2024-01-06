@@ -1,3 +1,6 @@
+# import sys
+# sys.path.append("C:\\Users\\tomic\\Desktop\\BasicStrategy\\BasicTrading")
+
 import pandas as pd
 
 from backtester.data import LoadData, StockData
@@ -5,14 +8,12 @@ from backtester.backtester import Backtester
 from backtester.plotter import Plotter
 
 from strategies.strategy_crossover import StrategyDC
-import sys
-sys.path.append("C:\\Users\\tomic\\Desktop\\BasicStrategy\\BasicTrading")
 
 # Specify the type of data you want
 ticker = 'DKNG'
 granul = '1h'
 start = '2022-03-01'
-end = '2023-12-01'
+end = '2024-01-05'
 
 # Load data according to specifications
 df_prices = LoadData(
