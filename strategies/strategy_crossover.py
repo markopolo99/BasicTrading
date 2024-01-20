@@ -3,13 +3,15 @@ from backtester.strategy import Strategy
 
 class StrategyDC(Strategy):
 
-    def __init__(self, stock_info, window_slow, window_fast):
-        self.stock_info = stock_info.train,
-        self.fast_ma = stock_info.train.open.rolling(window=window_fast).mean()
-        self.fast_ma.name = "fast_ma"
-        self.slow_ma = stock_info.train.open.rolling(window=window_slow).mean()
-        self.slow_ma.name = "slow_ma"
+    def __init__(self, window_slow, window_fast):
+        self.window_fast = window_fast
+        self.window_slow = window_slow
         self.ma_position = 'nowhere'
+
+    def strat_data(self, stock_info):
+        self.stock_info = stock_info,
+        self.fast_ma = stock_info.open.rolling(window=self.window_fast).mean()
+        self.slow_ma = stock_info.open.rolling(window=self.window_slow).mean()
 
     def long(self, date):
 

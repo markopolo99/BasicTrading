@@ -5,11 +5,10 @@ import pandas as pd
 
 class Plotter:
 
-    def __init__(self, strat_data, backtest_results) -> None:
+    def __init__(self, strat_data, backtest_results, equity) -> None:
         self.data = strat_data
         self.backtest_results = backtest_results
-        self.realised_equity = pd.DataFrame(backtest_results.equity.realised)
-        self.unrealised_equity = pd.DataFrame(backtest_results.equity.unrealised)
+        self.equity = equity
 
     def create_dashboard(self, indicators, stats):
 
@@ -41,8 +40,8 @@ class Plotter:
 
         fig.add_trace(
             go.Scatter(
-                x=self.backtest_results.tradelog.log.index,
-                y=self.backtest_results.tradelog.log["Entry price"],
+                x=self.backtest_results.exit_time,
+                y=self.backtest_results.entry_price,
                 mode="markers",
                 name="Entry price",
                 marker_symbol="diamond-dot",
@@ -59,8 +58,8 @@ class Plotter:
 
         fig.add_trace(
             go.Scatter(
-                x=self.backtest_results.tradelog.log["Exit time"],
-                y=self.backtest_results.tradelog.log["Exit price"],
+                x=self.backtest_results.exit_time,
+                y=self.backtest_results.exit_price,
                 mode="markers",
                 name="Exit price",
                 marker_symbol="diamond-dot",
@@ -101,23 +100,10 @@ class Plotter:
             col=1,
         )
 
-        # PLOT OF EQUITY MOVEMENT ACROSS TIME
         fig.add_trace(
             go.Scatter(
-                x=self.unrealised_equity.iloc[:, 0],
-                y=self.unrealised_equity.iloc[:, 1],
-                mode="lines",
-                name="Unrealised equity",
-                marker_color="blue",
-            ),
-            row=1,
-            col=2,
-        )
-
-        fig.add_trace(
-            go.Scatter(
-                x=self.realised_equity.iloc[:, 0],
-                y=self.realised_equity.iloc[:, 1],
+                x=self.equity.index,
+                y=self.equity.equity,
                 mode="markers",
                 name="Realised equity",
                 marker_color="red",
@@ -129,12 +115,12 @@ class Plotter:
         # Plots of positions
         fig.add_trace(
             go.Scatter(
-                x=self.backtest_results.tradelog.log["Exit time"],
-                y=self.backtest_results.tradelog.log["Spread"],
+                x=self.backtest_results.exit_time,
+                y=self.backtest_results.spread,
                 mode="markers",
                 name="Spread",
-                marker_size=list(abs(self.backtest_results.tradelog.log["Spread"].values) * 10),
-                marker_color=self.backtest_results.tradelog.log["Spread"].apply(lambda val: 'green' if val > 0 else 'red'),
+                marker_size=list(abs(self.backtest_results.spread) * 10),
+                marker_color=self.backtest_results.spread.apply(lambda val: 'green' if val > 0 else 'red'),
             ),
             row=4,
             col=1,
@@ -144,7 +130,7 @@ class Plotter:
         fig.add_trace(
             go.Table(
                 header=dict(values=["Statistics", "Values"]),
-                cells=dict(values=stats.T),
+                cells=dict(values=pd.DataFrame(stats.items()).T),
 
             ),
             row=3,
