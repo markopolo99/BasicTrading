@@ -38,49 +38,41 @@ class Plotter:
             col=1,
         )
 
-        fig.add_trace(
-            go.Scatter(
-                x=self.backtest_results.exit_time,
-                y=self.backtest_results.entry_price,
-                mode="markers",
-                name="Entry price",
-                marker_symbol="diamond-dot",
-                marker_size=13,
-                marker_line_width=2,
-                marker_line_color="rgba(0,0,0,0.7)",
-                marker_color="rgba(0,255,0,0.7)",
-                hovertemplate="Entry Price: %{y:.2f}",
-
-            ),
-            row=1,
-            col=1,
-        )
-
-        fig.add_trace(
-            go.Scatter(
-                x=self.backtest_results.exit_time,
-                y=self.backtest_results.exit_price,
-                mode="markers",
-                name="Exit price",
-                marker_symbol="diamond-dot",
-                marker_size=13,
-                marker_line_width=2,
-                marker_line_color="rgba(0,0,0,0.7)",
-                marker_color="rgba(255,0,0,0.7)",
-                hovertemplate="Exit Price: %{y:.2f}",
-            ),
-            row=1,
-            col=1,
-        )
+        for pos in self.backtest_results.iterrows():
+            if pos[1].position_type == 'long':
+                fig.add_trace(
+                    go.Scatter(
+                        x=[pos[1].entry_time, pos[1].exit_time],
+                        y=[pos[1].entry_price, pos[1].exit_price],
+                        mode="lines+markers",
+                        name="Entry price",
+                        marker_color='green'
+                    ),
+                    row=1,
+                    col=1,
+                )
+            else:
+                fig.add_trace(
+                    go.Scatter(
+                        x=[pos[1].entry_time, pos[1].exit_time],
+                        y=[pos[1].entry_price, pos[1].exit_price],
+                        mode="lines+markers",
+                        name="Entry price",
+                        marker_color='red'
+                    ),
+                    row=1,
+                    col=1,
+                )
 
         fig.update_layout(xaxis_rangeslider_visible=False)
 
         # PLOT OF INDICATOR MOVEMENTS
-        for col in indicators.columns:
+        for col in range(indicators.shape[1]):
+
             fig.add_trace(
                 go.Scatter(
                     x=indicators.index,
-                    y=indicators[col],
+                    y=indicators.iloc[:, col],
                     mode="lines",
                     name=col,
                 ),
@@ -104,9 +96,10 @@ class Plotter:
             go.Scatter(
                 x=self.equity.index,
                 y=self.equity.equity,
-                mode="markers",
+                mode="lines+markers",
                 name="Realised equity",
-                marker_color="red",
+                marker_color="yellow",
+                marker_line_color="red"
             ),
             row=1,
             col=2,

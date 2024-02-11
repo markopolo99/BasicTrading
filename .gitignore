@@ -9,3 +9,6 @@ __pycache__
 # Environment specific
 venv/
 .env
+
+.pkl
+.sqlite3

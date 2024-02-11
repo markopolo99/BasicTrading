@@ -26,14 +26,21 @@ class Backtester:
         self.stock = stock
         self.strategy = strategy
 
-    def run(self):
+    def run(self, optimizing: bool):
         """
         Iterate across the rows in the train dataset. This
         set will train the model and check the performance
         of the trading strategy.
         """
 
+        return_optimizer = {
+            'train_set': 0,
+            'test_set': 0,
+            'validation_set': 0
+        }
+
         train_test_info = {}
+        returns = {}
 
         for information_set in ['train', 'test', 'validation']:
 
@@ -48,19 +55,28 @@ class Backtester:
             equity = pd.DataFrame(trade_log.equity.realised.items(), columns=['time', 'equity']).set_index('time')
             trade_positions = pd.DataFrame(trade_log.tradelog.log).T
 
-            stats = self.get_stats(
-                equity=equity,
-                trade_positions=trade_positions,
-                dataset=dataset,
-            )
+            returns[information_set] = equity
 
-            train_test_info[information_set] = {
-                'equity_' + information_set: equity,
-                'trade_positions_' + information_set: trade_positions,
-                'stats_' + information_set: stats,
-            }
+            if optimizing:
+                return_optimizer[information_set + '_set'] = (equity, trade_positions)
 
-        return train_test_info
+            else:
+                stats = self.get_stats(
+                    equity=equity,
+                    trade_positions=trade_positions,
+                    dataset=dataset,
+                )
+
+                train_test_info[information_set] = {
+                    'equity_' + information_set: equity,
+                    'trade_positions_' + information_set: trade_positions,
+                    'stats_' + information_set: stats,
+                }
+
+        if optimizing:
+            return return_optimizer
+        else:
+            return train_test_info, returns
 
     def iterate_across_set(self, position_recorder: PositionState, dataset: StockData):
 
@@ -105,28 +121,30 @@ class Backtester:
         )
 
         # Indicies with negative and positive trades
-        negative_trades = trade_positions[trade_positions["spread"] < 0]["spread"]
-        positive_trades = trade_positions[trade_positions["spread"] >= 0]["spread"]
+        long_positions = trade_positions[trade_positions["position_type"] < 'short']["spread"]
+        short_positions = trade_positions[trade_positions["position_type"] == 'long']["spread"]
 
         stats = {
             "equity_start": round(equity["equity"][0], 2),
             "equity_final": round(equity["equity"][-1], 2),
             "equity_peak": round(equity["equity"].max(), 2),
             "return": round(equity["equity"][-1] / equity["equity"][0] * 100, 2),
-            "buy_and_hold_return": round(dataset.open[-1] / dataset.open[0] * 100, 2) ,
-            "volatility": round(equity["equity"].std(), 4),
-            "sharpe_ratio": round(equity["equity"].mean() / equity["equity"].std(), 4),
-            "max_drawdown": round(equity["equity"].min(), 2),
-            "average_drawdown": round(negative_trades.mean(), 4),
-            "max_drawdown_duration": str(trade_duration[negative_trades.index].max()),
-            "average_drawdown_duration": str(trade_duration[negative_trades.index].mean()).split('.')[0],
-            "average_upward_duration": str(trade_duration[positive_trades.index].mean()).split('.')[0],
-            "average_trade_duration": str(trade_duration.mean()).split('.')[0],
+            "buy_and_hold_return": round(dataset.open[-1] / dataset.open[0] * 100, 2),
+
+            "average_long_position": str(trade_duration[long_positions.index].values.mean()).split('.')[0],
+            "average_gain_long_position": round(long_positions[long_positions > 0].mean() * 100, 2),
+            "average_loss_long_position": round(long_positions[long_positions < 0].mean() * 100, 2),
+            "number_of_long_positions": len(long_positions),
+            "win_rate_long_positions": len(long_positions[long_positions > 0]) / len(long_positions),
+
+            "average_short_position": str(trade_duration[short_positions.index].values.mean()).split('.')[0],
+            "average_gain_short_position": round(long_positions[long_positions >= 0].mean() * 100, 2),
+            "average_loss_short_position": round(long_positions[long_positions <= 0].mean() * 100, 2),
+            "number_of_short_positoins": len(short_positions),
+            "win_rate_short_positions": len(long_positions[long_positions > 0]) / len(long_positions),
+
             "number_of_trades": len(trade_positions),
             "win_rate": round(profitable_trades / len(trade_positions), 4),
-            "best_trade": round(trade_positions["spread"].max(), 3),
-            "worst_trade": round(trade_positions["spread"].min(), 3),
-            "average_trade return": round(trade_positions["spread"].mean(), 3),
         }
 
         return stats
